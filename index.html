@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="حسابداری">
-    <link rel="apple-touch-icon" href="icon.jpg">
+    <link rel="apple-touch-icon" href="icon.png">
     
     <!-- کدهای Service Worker برای عملکرد آفلاین -->
     <script>
@@ -405,31 +405,6 @@
         DB.init().catch(err => console.error("بازسازی دیتابیس با خطا مواجه شد:", err));
         window.DB = DB;
 
-        const errorStyles = document.createElement('style');
-        errorStyles.textContent = `@keyframes slideInDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}.global-error-toast{pointer-events:auto;background:#fee2e2;color:#dc2626;padding:15px 35px 15px 15px;border-radius:8px;border:1px solid #fca5a5;box-shadow:0 4px 12px rgba(0,0,0,0.15);direction:ltr;text-align:left;font-family:monospace;position:relative;animation:slideInDown 0.4s ease-out;margin-bottom:10px}.global-error-toast .close-btn{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:16px;color:#dc2626;line-height:1}`;
-        document.head.appendChild(errorStyles);
-        function showGlobalError(title, message, details = '') {
-            let container = document.getElementById('global-error-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'global-error-container';
-                container.style.cssText = 'position:fixed;top:15px;right:15px;left:15px;z-index:99999;display:flex;flex-direction:column;pointer-events:none;';
-                document.body.appendChild(container);
-            }
-            const errorToast = document.createElement('div');
-            errorToast.className = 'global-error-toast';
-            errorToast.innerHTML = `<button class="close-btn" onclick="this.parentElement.remove()">✖</button><strong style="font-size:15px;">${title}</strong><br><br>${message}<br>${details ? `<hr style="border:0;border-top:1px solid #fca5a5;margin:10px 0;"><small>${details}</small>` : ''}`;
-            container.appendChild(errorToast);
-            setTimeout(() => { if (errorToast.parentElement) { errorToast.style.opacity = '0'; errorToast.style.transition = 'opacity 0.3s ease'; setTimeout(() => errorToast.remove(), 300); } }, 10000);
-        }
-        window.addEventListener('error', function(e) {
-            if (e.filename && e.filename.includes('extension')) return;
-            showGlobalError('❌ JavaScript Error:', e.message, `Line: ${e.lineno} | File: ${e.filename ? e.filename.split('/').pop() : 'Unknown'}`);
-        });
-        window.addEventListener('unhandledrejection', function(e) {
-            showGlobalError('❌ Promise/Network Error:', e.reason && e.reason.message ? e.reason.message : String(e.reason), 'مسیر فایل اشتباه است یا دسترسی مسدود شده.');
-        });
-
         try {
             if (!window.Vue) throw new Error("کتابخانه Vue.js بارگذاری نشد.");
             if (!window['vue3-sfc-loader']) throw new Error("کتابخانه vue3-sfc-loader بارگذاری نشد.");
@@ -450,15 +425,10 @@
                 components: { 'AppLayout': Vue.defineAsyncComponent(() => loadModule('./App.vue', options)) },
                 template: '<AppLayout></AppLayout>'
             });
-            
-            app.config.errorHandler = (err, instance, info) => {
-                showGlobalError('❌ Vue Component Error:', err.message, info);
-                console.error("Vue Error Details:", err);
-            };
-
             app.mount('#app');
         } catch(err) {
-            document.getElementById('app').innerHTML = `<div style="color:#dc2626;background:#fee2e2;padding:20px;text-align:left;direction:ltr;font-family:monospace;margin:15px;border-radius:8px;border:1px solid #fecaca;box-shadow:0 4px 6px rgba(0,0,0,0.1);"><strong style="font-size:16px;">❌ Setup Error:</strong><br><br>${err.message}</div>`;
+            console.error("Setup Error:", err);
+            document.getElementById('app').innerHTML = `<div style="color:#dc2626; background:#fee2e2; padding:20px; text-align:center; margin:15px; border-radius:8px; border:1px solid #fecaca;">خطا در بارگذاری اولیه سیستم. لطفاً اینترنت خود را بررسی کنید.</div>`;
         }
     </script>
 </body>
