@@ -845,3 +845,4 @@ const clearAllData = async () => {
 .btn-secondary { background-color: var(--border); color: var(--text-dark); }
 @keyframes modalScaleIn { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 </style>
+
