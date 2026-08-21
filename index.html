@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>سیستم حسابداری و تعمیرات</title>
+    
+    <!-- کدهای PWA برای نصب روی آیفون و اندروید -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="حسابداری">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <!-- کدهای Service Worker برای عملکرد آفلاین -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(function(err) {
+            console.log('خطا در ثبت Service Worker:', err);
+          });
+        });
+      }
+    </script>
+    <!-- پایان کدهای PWA -->
+
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue3-sfc-loader/dist/vue3-sfc-loader.js"></script>
+    <style>
+        :root{--primary:#3b82f6;--primary-dark:#2563eb;--primary-light:#eff6ff;--success:#10b981;--success-dark:#059669;--success-light:#ecfdf5;--warning:#f59e0b;--warning-dark:#d97706;--warning-light:#fffbeb;--danger:#ef4444;--danger-dark:#e11d48;--danger-light:#fff1f2;--purple:#8b5cf6;--purple-light:#f5f3ff;--bg-color:#f8fafc;--surface:#ffffff;--text-dark:#0f172a;--text-muted:#475569;--text-light:#94a3b8;--border:#e2e8f0;--border-hover:#cbd5e1;--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;--shadow-sm:0 1px 2px 0 rgba(0,0,0,0.05);--shadow-md:0 4px 6px -1px rgba(0,0,0,0.05),0 2px 4px -2px rgba(0,0,0,0.03);--shadow-lg:0 10px 25px -5px rgba(0,0,0,0.08),0 8px 10px -6px rgba(0,0,0,0.04);--shadow-float:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);--transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1)}
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Vazirmatn',Tahoma,sans-serif!important;-webkit-tap-highlight-color:transparent}
+        body{background-color:var(--bg-color);color:var(--text-dark);font-size:14px;line-height:1.6;overscroll-behavior-y:none}
+        #app-container{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+        /* اصلاح مشکل Safe Area در آیفون برای محتوای اصلی */
+        #main-content{flex:1;overflow-y:auto;padding:16px;padding-bottom:calc(110px + env(safe-area-inset-bottom))!important;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+        /* اصلاح مشکل Safe Area در آیفون برای منوی پایین */
+        .bottom-nav-wrapper{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translate3d(-50%,0,0);background:rgba(255,255,255,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(226,232,240,0.8);box-shadow:0 10px 30px rgba(15,23,42,0.08);width:95%;max-width:480px;height:70px;display:flex;justify-content:space-between;align-items:center;padding:0 8px;border-radius:24px;z-index:1000;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s ease}
+        .bottom-nav-wrapper.nav-hidden{transform:translate3d(-50%,150%,0);opacity:0;pointer-events:none}
+        .bottom-nav-wrapper .nav-item{display:flex;align-items:center;justify-content:center;flex:1;height:100%;border:none;background:transparent;cursor:pointer;position:relative;outline:none;transition:var(--transition)}
+        .bottom-nav-wrapper .nav-item:active{transform:scale(0.9)}
+        .bottom-nav-wrapper .nav-item-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;transition:var(--transition);color:var(--text-light)}
+        .bottom-nav-wrapper .nav-item svg{width:22px;height:22px;stroke:var(--text-light);stroke-width:2.2;fill:none;flex-shrink:0;transition:var(--transition);margin-bottom:4px}
+        .bottom-nav-wrapper .nav-item span{font-size:10.5px;font-weight:700;transition:var(--transition);white-space:nowrap}
+        .bottom-nav-wrapper .nav-item.active .nav-item-inner{color:var(--primary-dark);transform:translateY(-4px)}
+        .bottom-nav-wrapper .nav-item.active svg{stroke:var(--primary-dark);stroke-width:2.5;fill:var(--primary-light);filter:drop-shadow(0 4px 6px rgba(37,99,235,0.2));transform:scale(1.15)}
+        .bottom-nav-wrapper .nav-item.active span{font-weight:900}
+        .bottom-nav-wrapper .nav-item.active::after{content:'';position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:16px;height:4px;background:linear-gradient(90deg,var(--primary),var(--primary-dark));border-radius:4px;box-shadow:0 2px 6px rgba(37,99,235,0.4);animation:popInIndicator 0.4s forwards}
+        @keyframes popInIndicator{0%{width:0;opacity:0;transform:translateX(-50%) translateY(4px) scale(0.5)}100%{width:16px;opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+        .hide-scroll::-webkit-scrollbar{display:none} .hide-scroll{-ms-overflow-style:none;scrollbar-width:none} .hidden{display:none!important}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes modalScaleIn{0%{opacity:0;transform:scale(0.95) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+        .btn{width:100%;min-height:48px;padding:12px 16px;border:none;border-radius:var(--radius-md);font-weight:800;cursor:pointer;text-align:center;margin-top:10px;transition:var(--transition);font-size:14px;display:flex;justify-content:center;align-items:center;gap:8px}
+        .btn:active{transform:scale(0.97)} .btn-primary{background-color:var(--primary-dark);color:white;box-shadow:0 4px 12px rgba(37,99,235,0.2)} .btn-secondary{background-color:var(--border);color:var(--text-dark)}
+        .btn-close{background:var(--bg-color);border:none;width:32px;height:32px;border-radius:50%;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)} .btn-close:active{background:var(--border);transform:scale(0.9)}
+        .action-btn-group{display:flex;justify-content:center;gap:6px}
+        .btn-edit-sm,.btn-delete-sm{width:28px;height:28px;border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:var(--transition);border:1px solid transparent}
+        .btn-edit-sm{background:var(--primary-light);color:var(--primary-dark);border-color:#bfdbfe} .btn-delete-sm{background:var(--danger-light);color:var(--danger-dark);border-color:#fecdd3}
+        .form-group{margin-bottom:16px} .form-group label{display:block;margin-bottom:8px;font-weight:700;font-size:11px;color:var(--text-muted)}
+        .form-control{width:100%;min-width:0;min-height:44px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-md);background-color:var(--bg-color);font-size:13px;outline:none;direction:rtl;font-weight:700;text-align:right;color:var(--text-dark);transition:var(--transition)}
+        .form-control:focus{border-color:var(--primary);background-color:var(--surface);box-shadow:0 0 0 4px var(--primary-light)}
+        .card{background-color:var(--surface);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-md);transition:var(--transition);border:1px solid rgba(226,232,240,0.6)}
+        .card h2{font-size:16px;margin-bottom:16px;color:var(--text-dark);border-bottom:2px solid var(--bg-color);padding-bottom:10px;font-weight:800;display:flex;align-items:center;gap:8px}
+        .info-box{background:var(--bg-color);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:12px;font-size:12px;display:flex;flex-direction:column;gap:8px}
+        .info-row{display:flex;justify-content:space-between;align-items:center}
+        
+        /* استایل‌های مربوط به وضعیت‌ها و مودال */
+        .status-badge{padding:4px 8px;border-radius:var(--radius-sm);font-size:10px;font-weight:800;display:inline-block;white-space:nowrap}
+        .status-success{background:var(--success-light);color:var(--success-dark);border:1px solid #a7f3d0}
+        .status-warning{background:var(--warning-light);color:var(--warning-dark);border:1px solid #fde68a}
+        .alert-box{border-radius:var(--radius-md);padding:14px 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface);box-shadow:0 4px 10px -2px rgba(0,0,0,0.05);border:1px solid var(--border);border-right-width:4px}
+        .alert-danger{background:linear-gradient(to right,#fff1f2,#ffffff);border-color:#fecdd3;border-right-color:var(--danger);box-shadow:0 6px 15px -3px rgba(239,68,68,0.2)}
+        .alert-success{background:linear-gradient(to right,#ecfdf5,#ffffff);border-color:#a7f3d0;border-right-color:var(--success)}
+        .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1100;display:flex;justify-content:center;align-items:center;direction:rtl;padding:16px;transition:var(--transition)}
+        .modal-container{background:var(--surface);width:100%;max-height:90vh;border-radius:var(--radius-xl);box-shadow:var(--shadow-float);display:flex;flex-direction:column;overflow:hidden;animation:modalScaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1);border:1px solid rgba(255,255,255,0.2)}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--bg-color)}
+        .modal-title{font-size:15px;font-weight:900;color:var(--text-dark);margin:0}
+        .modal-body{padding:20px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+        .modal-footer{padding:16px 20px;border-top:1px solid var(--border);background:var(--bg-color)}
+        .modal-sm{max-width:320px}
+        .filter-group{display:flex;gap:6px;margin-bottom:16px;background:var(--bg-color);padding:6px;border-radius:var(--radius-md);justify-content:space-between;border:1px solid var(--border)}
+        .filter-btn{flex:1;min-height:38px;border:none;background:transparent;border-radius:var(--radius-sm);font-size:12px;font-weight:800;color:var(--text-muted);cursor:pointer;transition:var(--transition);direction:ltr}
+        .filter-btn.active{background:var(--surface);color:var(--primary-dark);box-shadow:var(--shadow-sm)}
+        .d-flex{display:flex} .flex-1{flex:1} .w-100{width:100%} .gap-sm{gap:8px} .gap-md{gap:12px} .m-0{margin:0!important} .mt-0{margin-top:0!important} .mt-sm{margin-top:8px} .mt-md{margin-top:12px} .mt-lg{margin-top:20px} .mb-0{margin-bottom:0!important} .mb-xs{margin-bottom:4px} .mb-sm{margin-bottom:8px} .mb-md{margin-bottom:12px} .mb-xl{margin-bottom:24px} .p-4{padding:16px!important} .text-center{text-align:center!important} .dir-ltr{direction:ltr!important;display:inline-block} .font-800{font-weight:800} .text-xs{font-size:10px} .text-sm{font-size:12px} .text-md{font-size:13px} .text-muted{color:var(--text-muted)!important} .text-dark{color:var(--text-dark)!important} .text-primary-dark{color:var(--primary-dark)!important} .text-success-dark{color:var(--success-dark)!important} .text-danger-dark{color:var(--danger-dark)!important} .text-warning-dark{color:var(--warning-dark)!important}
+        @media (max-width:768px){.flex-mobile-col{display:flex!important;flex-direction:column!important;gap:12px!important}}
+        .glass-overlay{align-items:flex-end;padding:0;background:rgba(17,24,39,0.45);backdrop-filter:blur(6px)}
+        .modern-bottom-sheet{background:#ffffff;width:100%;max-width:600px;border-radius:36px 36px 0 0;padding:20px 24px 30px 24px;animation:slideUpModern 0.4s cubic-bezier(0.2,0.8,0.2,1);display:flex;flex-direction:column;max-height:92vh;box-shadow:0 -10px 40px rgba(0,0,0,0.1)}
+        @keyframes slideUpModern{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .sheet-drag-handle{width:48px;height:5px;background:#e5e7eb;border-radius:4px;margin:0 auto 20px auto}
+        .modern-sheet-body{overflow-y:auto;padding-bottom:20px}
+        .modern-profile-header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+        .profile-avatar{width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,#a78bfa,#818cf8);color:white;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(129,140,248,0.3)}
+        .profile-info{flex:1;display:flex;flex-direction:column;gap:4px}
+        .profile-name{font-size:17px;font-weight:900;color:#111827;margin:0}
+        .profile-badge{font-size:11px;font-weight:800;color:var(--primary-dark);background:var(--primary-light);padding:2px 8px;border-radius:6px;align-self:flex-start}
+        .btn-circular-close{width:36px;height:36px;border-radius:50%;background:#f3f4f6;border:none;color:#4b5563;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.2s;flex-shrink:0}
+        .btn-circular-close:active{transform:scale(0.9);background:#e5e7eb}
+        .hero-balance-section{display:flex;flex-direction:column;align-items:center;text-align:center}
+        .hero-label{font-size:12px;color:#6b7280;font-weight:800;margin-bottom:6px}
+        .hero-amount-container{display:flex;align-items:baseline;gap:6px;justify-content:center;direction:rtl}
+        .hero-amount{font-size:38px;font-weight:900;letter-spacing:-1px;line-height:1}
+        .hero-currency{font-size:14px;font-weight:800;opacity:0.8;color:#ef4444}
+        .section-title-mod{font-size:13px;font-weight:900;color:var(--text-dark);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+        .solid-stats-grid{background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.02)}
+        .ss-item{padding:12px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;overflow:hidden}
+        .ss-border-b{border-bottom:1px solid #f3f4f6} .ss-border-l{border-left:1px solid #f3f4f6} .bg-lightest{background:#f8fafc}
+        .ss-lbl{font-size:9px;font-weight:800;color:#9ca3af;white-space:nowrap} .ss-val{font-size:12px;font-weight:900;color:#1f2937;white-space:nowrap}
+        .quick-pay-box{background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;padding:12px;box-shadow:0 4px 15px rgba(0,0,0,0.02)}
+        .empty-schedule{text-align:center;padding:16px;font-size:13px;font-weight:800;border-radius:16px}
+        .quick-pay-input{font-size:17px;font-weight:900;padding:12px 16px;border-radius:12px;border:2px solid #e5e7eb;width:100%;outline:none;background:#f9fafb;color:#111827;transition:0.2s;text-align:right}
+        .quick-pay-input:focus{border-color:var(--primary);background:white;box-shadow:0 0 0 3px var(--primary-light)}
+        .btn-quick-pay{width:52px;height:52px;border-radius:12px;background:#d1d5db;color:#6b7280;border:none;display:flex;align-items:center;justify-content:center;transition:0.2s;flex-shrink:0}
+        .btn-quick-pay:not(:disabled){background:#10b981;color:white;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.3)}
+        .btn-quick-pay:not(:disabled):active{transform:scale(0.9)}
+        .payments-timeline-wrapper{margin-top:24px}
+        .timeline-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+        .th-icon{width:32px;height:32px;border-radius:10px;background:#f3f4f6;color:#4b5563;display:flex;align-items:center;justify-content:center}
+        .th-title{font-size:15px;font-weight:900;color:#111827;margin:0;flex:1}
+        .th-badge{font-size:11px;font-weight:800;background:#e0e7ff;color:#1d4ed8;padding:4px 10px;border-radius:20px}
+        .timeline-list{display:flex;flex-direction:column;gap:10px;position:relative;padding-right:12px}
+        .timeline-list::before{content:'';position:absolute;right:28px;top:10px;bottom:10px;width:2px;background:#f3f4f6;z-index:0}
+        .tl-item{display:flex;gap:12px;position:relative;z-index:1;align-items:center}
+        .tl-content{flex:1;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:0 12px;height:46px;display:flex;justify-content:space-between;align-items:center;transition:0.2s;box-sizing:border-box}
+        .tl-content:active{background:#f9fafb;transform:scale(0.98)}
+        .tl-del-btn{width:32px;height:32px;border-radius:10px;background:#fef2f2;color:#ef4444;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.2s;flex-shrink:0}
+        .tl-del-btn:active{background:#fee2e2;transform:scale(0.85)}
+        .tl-amount-group{display:flex;align-items:center;gap:6px}
+        .tl-date-group{display:flex;align-items:center;gap:12px}
+        .tl-amount{font-size:17px;font-weight:900;color:#0f172a;display:block;line-height:1;transform:translateY(1px);margin:0}
+        .tl-currency{font-size:11px;font-weight:800;color:#94a3b8;display:block;line-height:1;transform:translateY(2px);margin:0}
+        .tl-date{font-size:12px;font-weight:800;color:#64748b;display:block;line-height:1;transform:translateY(1px);margin:0}
+        .tl-marker{width:32px;height:32px;border-radius:10px;background:#ecfdf5;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#059669;flex-shrink:0;box-shadow:0 2px 6px rgba(5,150,105,0.15)}
+        .tl-marker span{transform:translateY(1px)}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; color: var(--primary); font-weight: bold;">
+            درحال بارگذاری سیستم...
+        </div>
+    </div>
+    
+    <script>
+        window.SysUtils = {
+            toEnglishDigits(str) {
+                if (!str) return '';
+                return str.toString().replace(/[\u0660-\u0669\u06f0-\u06f9]/g, c => c.charCodeAt(0) & 15);
+            },
+            formatNumber(num) {
+                if (num === null || num === undefined || num === '') return '';
+                const parsed = Number(num);
+                return isNaN(parsed) ? '' : parsed.toLocaleString('en-US');
+            },
+            unformatNumber(str) {
+                if (!str) return 0;
+                const cleanStr = window.SysUtils.toEnglishDigits(str).replace(/,/g, '').replace(/\D/g, '');
+                return Number(cleanStr) || 0;
+            },
+            getPersianDate() {
+                const d = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+                return window.SysUtils.toEnglishDigits(d).replace(/\//g, '/');
+            },
+            getPersianDateInt(dateStr) {
+                if (!dateStr) return 0;
+                return parseInt(window.SysUtils.toEnglishDigits(dateStr).replace(/\//g, '')) || 0;
+            },
+            addMonthsPersian(dateStr, monthsToAdd) {
+                if (!dateStr) return '';
+                let parts = dateStr.split('/');
+                if (parts.length !== 3) return dateStr;
+                let y = parseInt(parts[0]), m = parseInt(parts[1]), d = parseInt(parts[2]);
+                m += monthsToAdd;
+                while (m > 12) { m -= 12; y++; }
+                return `${y}/${m.toString().padStart(2, '0')}/${d.toString().padStart(2, '0')}`;
+            },
+            getInstPaid(item) {
+                if (item.payments && item.payments.length > 0) {
+                    return item.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+                }
+                return item.isPaid ? Number(item.amount || 0) : 0;
+            },
+
+            // الگوریتم محاسبه مالی و سود قطعی برای "فروش"
+            getFinancials(sale) {
+                if (!sale) return { finalPrice: 0, downPayment: 0, instPaid: 0, debt: 0, paymentPerInst: 0, totalInstDebt: 0, interestPerInst: 0, grandTotalProfit: 0, baseProfit: 0, paid: 0, expectedProfit: 0, realizedProfit: 0, cost: 0 };
+                
+                let finalPrice = Number(sale.sellPrice || sale.finalPrice || 0);
+                const downPayment = Number(sale.downPayment || 0);
+                let scheduleTotal = 0, schedulePaid = 0, quickPaid = 0, paid = 0, instPaid = 0;
+                
+                if (sale.payments && Array.isArray(sale.payments)) {
+                    quickPaid = sale.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+                }
+                
+                if (sale.paymentType === 'cash') {
+                    paid = finalPrice;
+                } else if (sale.paymentType === 'credit') {
+                    paid = Number(sale.initialPayment || 0) + quickPaid;
+                } else if (sale.paymentType === 'installment') {
+                    if (sale.schedule && Array.isArray(sale.schedule) && sale.schedule.length > 0) {
+                        sale.schedule.forEach(s => {
+                            scheduleTotal += Number(s.amount || 0);
+                            schedulePaid += window.SysUtils.getInstPaid(s);
+                        });
+                    } else {
+                        scheduleTotal = (finalPrice - downPayment);
+                    }
+                    instPaid = schedulePaid + quickPaid;
+                    finalPrice = downPayment + scheduleTotal;
+                    paid = downPayment + instPaid;
+                }
+
+                const totalInstDebt = scheduleTotal;
+                const debt = Math.max(0, finalPrice - paid);
+                
+                // --- منطق محاسبه سود قطعی و زیان (Cost-Recovery First) ---
+                const buyPrice = Number(sale.buyPrice || 0);
+                const partnerShare = Number(sale.partnerShare || 0);
+                const cost = buyPrice + partnerShare; 
+                
+                const expectedProfit = finalPrice - cost; 
+                
+                let realizedProfit = 0;
+                if (paid >= cost) {
+                    realizedProfit = paid - cost;
+                } else if (debt <= 0) {
+                    realizedProfit = expectedProfit; 
+                }
+                // ------------------------------------------------------------------
+
+                const baseProfit = Number(sale.profit || 0);
+                
+                let paymentPerInst = 0;
+                if (sale.schedule && sale.schedule.length > 0) {
+                    paymentPerInst = sale.schedule[0].amount;
+                } else if (sale.installCount > 0) {
+                    paymentPerInst = Math.round(totalInstDebt / sale.installCount);
+                }
+                const principal = (Number(sale.sellPrice || 0) - downPayment);
+                const interestPerInst = Math.round(principal * ((sale.rate || 0) / 100));
+
+                return { 
+                    finalPrice, 
+                    paid, 
+                    downPayment, 
+                    instPaid, 
+                    debt, 
+                    paymentPerInst, 
+                    totalInstDebt, 
+                    interestPerInst, 
+                    baseProfit, 
+                    grandTotalProfit: realizedProfit, 
+                    expectedProfit, 
+                    realizedProfit, 
+                    cost 
+                };
+            },
+
+            // الگوریتم محاسبه مالی و سود قطعی برای "تعمیرات"
+            getRepairFinancials(repair) {
+                const finalPrice = Number(repair.totalPrice || repair.totalCost || repair.price || 0);
+                let paidAmount = Number(repair.initialPayment || repair.paid || 0);
+                if (repair.payments && Array.isArray(repair.payments)) {
+                    paidAmount += repair.payments.reduce((s, p) => s + Number(p.amount || 0), 0);
+                }
+                const debt = Math.max(0, finalPrice - paidAmount);
+                
+                // --- منطق محاسبه سود/زیان ---
+                const partsCost = Number(repair.partsCost || 0);
+                const partnerShare = Number(repair.partnerShare || 0);
+                const cost = partsCost + partnerShare;
+                
+                const expectedProfit = finalPrice - cost; 
+                
+                let realizedProfit = 0;
+                if (paidAmount >= cost) {
+                    realizedProfit = paidAmount - cost;
+                } else if (debt <= 0) {
+                    realizedProfit = expectedProfit;
+                }
+                // ----------------------------------
+
+                return { 
+                    finalPrice, 
+                    paidAmount, 
+                    paid: paidAmount, 
+                    debt, 
+                    expectedProfit, 
+                    realizedProfit, 
+                    cost 
+                };
+            },
+
+            getInitialPayment(sale) {
+                if (!sale) return 0;
+                if (sale.paymentType === 'installment') return Number(sale.downPayment || 0);
+                if (sale.paymentType === 'credit') return Number(sale.initialPayment || 0);
+                return Number(sale.sellPrice || 0); 
+            },
+            getPaymentTypeName(type) {
+                if (type === 'cash') return 'نقدی';
+                if (type === 'credit') return 'نسیه';
+                if (type === 'installment') return 'اقساطی';
+                return 'نامشخص';
+            }
+        };
+
+        const DB = {
+            dbName: 'ShopManagerDB_VuePro', version: 3, instance: null, initPromise: null, _invoiceLock: false, 
+            init() {
+                if (this.initPromise) return this.initPromise;
+                this.initPromise = new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.version);
+                    request.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('sales')) db.createObjectStore('sales', { keyPath: 'id' });
+                        if (!db.objectStoreNames.contains('repairs')) db.createObjectStore('repairs', { keyPath: 'id' });
+                        if (!db.objectStoreNames.contains('partners')) db.createObjectStore('partners', { keyPath: 'id' });
+                        if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'id' });
+                    };
+                    request.onsuccess = (e) => { this.instance = e.target.result; resolve(this.instance); };
+                    request.onerror = (e) => { console.error("خطا در اتصال:", e.target.error); this.initPromise = null; reject(e.target.error); };
+                });
+                return this.initPromise;
+            },
+            async ensureDB() { if (!this.instance) await this.init(); },
+            generateId() { return `${Date.now()}_${Math.random().toString(36).substring(2, 11)}_${Math.floor(Math.random() * 1000)}`; },
+            async getNextInvoiceNumber() {
+                await this.ensureDB();
+                while (this._invoiceLock) await new Promise(res => setTimeout(res, 50));
+                this._invoiceLock = true;
+                return new Promise((resolve, reject) => {
+                    const tx = this.instance.transaction('settings', 'readwrite');
+                    const request = tx.objectStore('settings').get('invoiceCounter');
+                    request.onsuccess = () => {
+                        let data = request.result || { id: 'invoiceCounter', value: 0 };
+                        data.value += 1;
+                        const putReq = tx.objectStore('settings').put(data);
+                        putReq.onsuccess = () => { this._invoiceLock = false; resolve(`S-${data.value}`); };
+                        putReq.onerror = (e) => { this._invoiceLock = false; reject(e.target.error); };
+                    };
+                    request.onerror = (e) => { this._invoiceLock = false; reject(e.target.error); };
+                });
+            },
+            async getAll(storeName) {
+                await this.ensureDB();
+                return new Promise((resolve, reject) => {
+                    const request = this.instance.transaction(storeName, 'readonly').objectStore(storeName).getAll();
+                    request.onsuccess = () => resolve(request.result || []);
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            },
+            async put(storeName, data) {
+                await this.ensureDB();
+                return new Promise((resolve, reject) => {
+                    const request = this.instance.transaction(storeName, 'readwrite').objectStore(storeName).put(data);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            },
+            async delete(storeName, id) {
+                await this.ensureDB();
+                return new Promise((resolve, reject) => {
+                    const request = this.instance.transaction(storeName, 'readwrite').objectStore(storeName).delete(id);
+                    request.onsuccess = () => resolve();
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            },
+            async clearAll() {
+                await this.ensureDB();
+                return new Promise((resolve, reject) => {
+                    const storeNames = ['sales', 'repairs', 'partners', 'settings'];
+                    const tx = this.instance.transaction(storeNames, 'readwrite');
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = (e) => reject(e.target.error);
+                    storeNames.forEach(name => tx.objectStore(name).clear());
+                });
+            },
+            async restoreBackup(backupData) {
+                await this.ensureDB();
+                if (!backupData || typeof backupData !== 'object') throw new Error('ساختار فایل پشتیبان نامعتبر است.');
+                return new Promise((resolve, reject) => {
+                    const storeNames = ['sales', 'repairs', 'partners', 'settings'];
+                    const tx = this.instance.transaction(storeNames, 'readwrite');
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = (e) => reject(e.target.error);
+                    tx.onabort = () => reject(new Error('عملیات لغو شد.'));
+                    try {
+                        storeNames.forEach(storeName => {
+                            const store = tx.objectStore(storeName);
+                            store.clear(); 
+                            if (backupData[storeName] && Array.isArray(backupData[storeName])) {
+                                backupData[storeName].forEach(item => store.put(item));
+                            }
+                        });
+                    } catch (error) { tx.abort(); }
+                });
+            }
+        };
+        DB.init().catch(err => console.error("بازسازی دیتابیس با خطا مواجه شد:", err));
+        window.DB = DB;
+
+        const errorStyles = document.createElement('style');
+        errorStyles.textContent = `@keyframes slideInDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}.global-error-toast{pointer-events:auto;background:#fee2e2;color:#dc2626;padding:15px 35px 15px 15px;border-radius:8px;border:1px solid #fca5a5;box-shadow:0 4px 12px rgba(0,0,0,0.15);direction:ltr;text-align:left;font-family:monospace;position:relative;animation:slideInDown 0.4s ease-out;margin-bottom:10px}.global-error-toast .close-btn{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:16px;color:#dc2626;line-height:1}`;
+        document.head.appendChild(errorStyles);
+        function showGlobalError(title, message, details = '') {
+            let container = document.getElementById('global-error-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'global-error-container';
+                container.style.cssText = 'position:fixed;top:15px;right:15px;left:15px;z-index:99999;display:flex;flex-direction:column;pointer-events:none;';
+                document.body.appendChild(container);
+            }
+            const errorToast = document.createElement('div');
+            errorToast.className = 'global-error-toast';
+            errorToast.innerHTML = `<button class="close-btn" onclick="this.parentElement.remove()">✖</button><strong style="font-size:15px;">${title}</strong><br><br>${message}<br>${details ? `<hr style="border:0;border-top:1px solid #fca5a5;margin:10px 0;"><small>${details}</small>` : ''}`;
+            container.appendChild(errorToast);
+            setTimeout(() => { if (errorToast.parentElement) { errorToast.style.opacity = '0'; errorToast.style.transition = 'opacity 0.3s ease'; setTimeout(() => errorToast.remove(), 300); } }, 10000);
+        }
+        window.addEventListener('error', function(e) {
+            if (e.filename && e.filename.includes('extension')) return;
+            showGlobalError('❌ JavaScript Error:', e.message, `Line: ${e.lineno} | File: ${e.filename ? e.filename.split('/').pop() : 'Unknown'}`);
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            showGlobalError('❌ Promise/Network Error:', e.reason && e.reason.message ? e.reason.message : String(e.reason), 'مسیر فایل اشتباه است یا دسترسی مسدود شده.');
+        });
+
+        try {
+            if (!window.Vue) throw new Error("کتابخانه Vue.js بارگذاری نشد.");
+            if (!window['vue3-sfc-loader']) throw new Error("کتابخانه vue3-sfc-loader بارگذاری نشد.");
+            const { loadModule } = window['vue3-sfc-loader'];
+            const options = {
+                moduleCache: { vue: Vue },
+                async getFile(url) {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error(`فایل پیدا نشد: ${url}`);
+                    return { getContentData: asBinary => asBinary ? res.arrayBuffer() : res.text() }
+                },
+                addStyle(textContent) {
+                    const style = Object.assign(document.createElement('style'), { textContent });
+                    document.head.appendChild(style);
+                },
+            };
+            const app = Vue.createApp({
+                components: { 'AppLayout': Vue.defineAsyncComponent(() => loadModule('./App.vue', options)) },
+                template: '<AppLayout></AppLayout>'
+            });
+            
+            app.config.errorHandler = (err, instance, info) => {
+                showGlobalError('❌ Vue Component Error:', err.message, info);
+                console.error("Vue Error Details:", err);
+            };
+
+            app.mount('#app');
+        } catch(err) {
+            document.getElementById('app').innerHTML = `<div style="color:#dc2626;background:#fee2e2;padding:20px;text-align:left;direction:ltr;font-family:monospace;margin:15px;border-radius:8px;border:1px solid #fecaca;box-shadow:0 4px 6px rgba(0,0,0,0.1);"><strong style="font-size:16px;">❌ Setup Error:</strong><br><br>${err.message}</div>`;
+        }
+    </script>
+</body>
+</html>
