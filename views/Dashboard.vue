@@ -325,7 +325,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, onMounted, onActivated } from 'vue';
 
@@ -491,7 +490,8 @@ const headerIconClass = computed(() => {
   return 'bg-icon-primary';
 });
 
-const backupData = () => {
+// تابع بکاپ‌گیری با قابلیت اشتراک‌گذاری مستقیم در آیفون
+const backupData = async () => {
   try {
     const backupPayload = {
       version: '1.0',
@@ -501,13 +501,31 @@ const backupData = () => {
       partners: activePartners.value
     };
 
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
+    const jsonString = JSON.stringify(backupPayload, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const fileName = `backup_accounting_${new Date().toLocaleDateString('fa-IR').replace(/\//g, '-')}.json`;
+
+    if (navigator.share && navigator.canShare) {
+      const file = new File([blob], fileName, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'بکاپ سیستم حسابداری',
+          text: 'فایل پشتیبان اطلاعات حسابداری شما'
+        });
+        return;
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
     const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `backup_accounting_${new Date().toLocaleDateString('fa-IR').replace(/\//g, '-')}.json`);
+    downloadAnchor.setAttribute("href", url);
+    downloadAnchor.setAttribute("download", fileName);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+    URL.revokeObjectURL(url);
+
   } catch (e) {
     alert('خطا در تهیه فایل پشتیبان: ' + e.message);
   }
@@ -563,7 +581,6 @@ const clearAllData = async () => {
 };
 </script>
 
-
 <style scoped>
 .dashboard-page {
   --primary: #3b82f6; 
@@ -599,7 +616,7 @@ const clearAllData = async () => {
   direction: rtl;
   text-align: right;
   padding-bottom: 20px;
-  overflow-x: hidden; /* قفل اسکرول افقی */
+  overflow-x: hidden;
   width: 100%;
 }
 
@@ -828,4 +845,3 @@ const clearAllData = async () => {
 .btn-secondary { background-color: var(--border); color: var(--text-dark); }
 @keyframes modalScaleIn { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 </style>
-
