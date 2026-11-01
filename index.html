@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fa">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+    <title>حساب‌یار موبایل</title>
+    <meta name="theme-color" content="#070b14" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="حساب‌یار" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="icon" href="./icon-192.png" />
+    <style id="expo-reset">
+      html, body { height: 100%; }
+      body { overflow: hidden; background: #070b14; }
+      #root { display: flex; height: 100%; flex: 1; }
+    </style>
+  <meta name="theme-color" content="#070b14">
+</head>
+  <body>
+    <noscript>برای اجرای برنامه، جاوااسکریپت باید فعال باشد.</noscript>
+    <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then(function (reg) {
+          reg.addEventListener('updatefound', function () { window.location.reload(); });
+          if (reg.active && !navigator.serviceWorker.controller) { window.location.reload(); }
+        }).catch(function () {});
+      }
+    </script>
+  <script src="/mobile-accounting/_expo/static/js/web/index-c4b4dccbf6647c36c85cbeeb812821ff.js" defer></script>
+</body>
+</html>
